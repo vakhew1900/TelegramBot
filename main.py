@@ -2,6 +2,7 @@ from typing import Text
 import telebot as tb
 from telebot.types import Chat
 from telebot import types
+import serial
 
 TOKEN = '5000887285:AAHjNN6dtwvIpCYzSglXGfFDXVQ4N_NmfB8'
 botName ="MicroTigerBot"
@@ -46,6 +47,13 @@ def temperature_type_message(message):
       bot.send_message(message.chat.id, "не совсем понял...")
 
 def find_temperature():
-   return 25.5 
+   ser = serial.Serial('/dev/ttyS1', 115200)
+   ser.write(b'GET_temp')
+   line = ser.readline()
+   print(line)
+   line =str(line).replace('b\'TEMP = ','').replace("\\n\'",'')
+   ser.close()
+   return int(line) 
+   
 
 bot.infinity_polling()
