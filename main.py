@@ -3,6 +3,13 @@ import telebot as tb
 from telebot.types import Chat
 from telebot import types
 import serial
+import onionGpio
+import time
+
+gpioSetNumber = 3
+
+gpioSet = onionGpio.OnionGpio(gpioSetNumber)
+status = gpioSet.setOutputDirection(0) #receiver
 
 TOKEN = '5000887285:AAHjNN6dtwvIpCYzSglXGfFDXVQ4N_NmfB8'
 botName ="MicroTigerBot"
@@ -47,11 +54,15 @@ def temperature_type_message(message):
       bot.send_message(message.chat.id, "не совсем понял...")
 
 def find_temperature():
-   ser = serial.Serial('/dev/ttyS1', 115200)
+   status = gpioSet.setOutputDirection(1) #transmitter
+   time.sleep(0.8)
+   ser = serial.Serial('/dev/ttyS1', 9600, timeout=4)
    ser.write(b'GET_temp')
+   time.sleep(0.1)
+   status = gpioSet.setOutputDirection(0) #receiver
    line = ser.readline()
    print(line)
-   line =str(line).replace('b\'TEMP = ','').replace("\\n\'",'')
+   line =str(line).replace('b\'TEMP = ','').replace("\\r\\n\'",'')
    ser.close()
    return int(line) 
    
